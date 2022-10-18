@@ -6,15 +6,22 @@ public class Tests
 
     IEnumerable<string> TestExpressions => new[]
     {
-        "1 + 2 / 3 * 5 - 2", "(1 + 2) * 3", "1 / 32.5 + 167 * (3498 - 1155) * -721 * (4885 - 1) / 0.5",
+        "1 + 2 * 3", "(1 + 2) * 3", "1 / 32.5 + 167 * (3498 - 1155) * -721 * (4885 - 1) / 0.5",
         "sin(cos(1)) * cos(1)"
     };
 
-    // IEnumerable<IEnumerable<char>> TestPostfix => new[] {new[] {'1', '2', '3', '*', '+'}, new[]
-    // {
-    //     ''
-    // }};
-    IEnumerable<double> TestExpectations => new[] {2.3333333333, 9, -2755685654567.969, 0.2779289443079115};
+    IEnumerable<IEnumerable<string>> TestPostfixes => new[]
+    {
+        new[] {"1", "2", "3", "*", "+"}, new[] {"1", "2", "+", "3", "*"},
+        new[]
+        {
+            "1", "32.5", "/", "167", "3498", "1155", "-", "*", "+", "-721", "*", "4885", "1", "-", "*",
+            "0.5", "/"
+        },
+        new[] {"1", "cos", "sin", "1", "cos", "*"}
+    };
+
+    IEnumerable<double> TestExpectations => new[] {7, 9, -2755685654567.969, 0.2779289443079115};
 
     [SetUp]
     public void Setup() { _calculator = new(); }
@@ -24,7 +31,7 @@ public class Tests
     {
         foreach (string expr in TestExpressions)
         {
-            var split = _calculator.SplitExpression(
+            var split = OperatorHelper.SplitExpression(
                 expr,
                 OperatorHelper.IsOperator,
                 OperatorHelper.IsTrigonometricOperator
@@ -35,7 +42,7 @@ public class Tests
                 Assert.That(
                     isOperator
                             ? OperatorHelper.IsOperator(c) || OperatorHelper.IsTrigonometricOperator(c)
-                            : int.TryParse(c.ToString(), out var _)
+                            : int.TryParse(c, out var _)
                 );
             }
         }
@@ -44,9 +51,25 @@ public class Tests
     [Test]
     public void OK_Convert_Expression_To_Postfix_Notation()
     {
-        foreach (string expr in TestExpressions)
+        using var exprEnumerater = TestExpressions.GetEnumerator();
+        using var postfixEnumerator = TestPostfixes.GetEnumerator();
+
+        while (exprEnumerater.MoveNext() &&
+               postfixEnumerator.MoveNext())
         {
-            var postfix = _calculator.ConvertToPostfix(expr);
+            var curExpr = exprEnumerater.Current;
+            var curPostfix = postfixEnumerator.Current;
+
+            using var innerExpr = _calculator.ConvertToPostfix(curExpr).GetEnumerator();
+            using var innerPostfix = curPostfix.GetEnumerator();
+            while (innerExpr.MoveNext() &&
+                   innerPostfix.MoveNext())
+            {
+                var innerCurExpr = innerExpr.Current;
+                var innerCurPostfix = innerPostfix.Current;
+
+                Assert.AreEqual(innerCurExpr, innerCurPostfix);
+            }
         }
     }
 

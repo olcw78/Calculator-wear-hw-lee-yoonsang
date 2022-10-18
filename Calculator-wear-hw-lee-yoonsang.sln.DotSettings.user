@@ -1,10 +1,4 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a7f26608_002Daaab_002D40c2_002Dba45_002D49af64d927f0/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;And&gt;
-    &lt;TestAncestor&gt;
-      &lt;TestId&gt;NUnit3x::9DFD6919-4912-4B47-9B37-87263A66CCA5::net6.0::CalculatorTest.Tests&lt;/TestId&gt;
-    &lt;/TestAncestor&gt;
-    &lt;Project Location="/Users/highp/workspace/web/front/webgl/TSEngine/Calculator-wear-hw-lee-yoonsang/CalculatorTest" Presentation="&amp;lt;CalculatorTest&amp;gt;" /&gt;
-    &lt;Namespace&gt;CalculatorTest&lt;/Namespace&gt;
-  &lt;/And&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a7f26608_002Daaab_002D40c2_002Dba45_002D49af64d927f0/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="C:\Users\dlrnt\workspace\Calculator-wear-hw-lee-yoonsang\CalculatorTest" Presentation="&amp;lt;CalculatorTest&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

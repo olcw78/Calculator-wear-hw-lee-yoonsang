@@ -1,112 +1,57 @@
+using System.Runtime.InteropServices.ComTypes;
+
 public class Calculator
 {
-#region Behaviour
-
-    public IEnumerable<(char c, bool isOperator)> SplitExpression(
-        string expr,
-        params Func<char, bool>[] operatorValidators
-    )
-    {
-        foreach (char c in expr)
-        {
-            if (c == ' ')
-                continue;
-
-            yield return (
-                c,
-                operatorValidators
-                       .Select(validator => validator(c))
-                       .Aggregate((p, n) => p | n)
-            );
-        }
-    }
-
-    public IEnumerable<char> ConvertToPostfix(string expression)
-    {
-        // 2. put all of the elements into the stack to configure in postfix notation.
-        var exprEnumerable = SplitExpression(
-            expression,
-            OperatorHelper.IsOperator,
-            OperatorHelper.IsTrigonometricOperator
-        );
-
-        var postFix = new List<char>();
-        var operators = new Stack<char>();
-
-        using var enumerator = exprEnumerable.GetEnumerator();
-        while (enumerator.MoveNext())
-        {
-            var (c, isOp) = enumerator.Current;
-
-            if (c == '(')
-            {
-                while (enumerator.MoveNext())
-                {
-                    (c, isOp) = enumerator.Current;
-                    if (c == ')')
-                        break;
-
-                    if (isOp)
-                        operators.Push(c);
-                    else
-                        postFix.Add(c);
-                }
-            }
-
-            if (isOp)
-            {
-                ComparePriorityRecursively(c, operators, postFix);
-                continue;
-            }
-
-            postFix.Add(c);
-        }
-
-        postFix.AddRange(operators);
-
-        return postFix;
-    }
-
     public double Evaluate(string expression)
     {
-        var postFix = ConvertToPostfix(expression);
+        var postFixEnumerable = ConvertToPostfix(expression);
 
         // 3. calculate the notation
         var result = new Stack<double>();
 
-        foreach (char c in postFix)
+        foreach (string str in postFixEnumerable)
         {
-            double n1 = 0.0;
-            double n2 = 0.0;
+            double n1;
+            double n2;
 
-            switch (c)
+            switch (str)
             {
-                case '+':
+                case "+":
                     _ = result.TryPop(out n1);
                     _ = result.TryPop(out n2);
                     result.Push(n2 + n1);
                     break;
 
-                case '-':
+                case "-":
                     _ = result.TryPop(out n1);
                     _ = result.TryPop(out n2);
                     result.Push(n2 - n1);
                     break;
 
-                case '*':
+                case "*":
                     _ = result.TryPop(out n1);
                     _ = result.TryPop(out n2);
                     result.Push(n2 * n1);
                     break;
 
-                case '/':
+                case "/":
                     _ = result.TryPop(out n1);
                     _ = result.TryPop(out n2);
                     result.Push(n2 / n1);
                     break;
 
+                case "sin":
+                    _ = result.TryPop(out n1);
+                    result.Push(Math.Sin(n1));
+                    break;
+
+                case "cos":
+                    _ = result.TryPop(out n1);
+                    result.Push(Math.Cos(n1));
+                    break;
+
                 default:
-                    if (double.TryParse(c.ToString(), out double parsed))
+                    if (double.TryParse(str, out double parsed))
                         result.Push(parsed);
                     break;
             }
@@ -115,13 +60,62 @@ public class Calculator
         return result.Pop();
     }
 
-#endregion Behaviour
+    public IEnumerable<string> ConvertToPostfix(string expression)
+    {
+        var postFix = new List<string>();
+        var operators = new Stack<string>();
+
+        var exprEnumerable = OperatorHelper.SplitExpression(
+            expression,
+            OperatorHelper.IsOperator,
+            OperatorHelper.IsTrigonometricOperator
+        );
+
+        using var enumerator = exprEnumerable.GetEnumerator();
+        while (enumerator.MoveNext())
+        {
+            var (str, isOp) = enumerator.Current;
+
+            if (str == "(")
+            {
+                while (enumerator.MoveNext())
+                {
+                    (str, isOp) = enumerator.Current;
+                    if (str == ")")
+                        break;
+
+                    if (isOp)
+                        operators.Push(str);
+                    else
+                        postFix.Add(str);
+                }
+
+                postFix.AddRange(operators);
+                operators.Clear();
+
+                continue;
+            }
+
+            if (isOp)
+            {
+                ComparePriorityRecursively(str, operators, postFix);
+                continue;
+            }
+
+            postFix.Add(str);
+        }
+
+        postFix.AddRange(operators);
+
+        return postFix;
+    }
+
 
     /// <summary>
     /// 2 연산자의 우선순위를 비교하여 재귀적으로 수식을 구성.
     /// </summary>
     /// <param name="newChar">새로운 char</param>
-    void ComparePriorityRecursively(char newChar, Stack<char> operators, List<char> postfix)
+    void ComparePriorityRecursively(string newChar, Stack<string> operators, List<string> postfix)
     {
         // 비교할 연산자가 아얘 없을 경우
         if (operators.Count == 0)
@@ -130,7 +124,7 @@ public class Calculator
             return;
         }
 
-        char last = operators.Peek();
+        string last = operators.Peek();
         int prevPriority = OperatorHelper.EvaluatePriority(last);
         int newPriority = OperatorHelper.EvaluatePriority(newChar);
 
