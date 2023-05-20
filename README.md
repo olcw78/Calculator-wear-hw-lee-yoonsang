@@ -1,4 +1,4 @@
-# We-Ar 개발자 과제 이윤상
+# c# 계산기 프로그램
 
 ## 프로젝트 구성
 - Calculator: 계산기 program.
